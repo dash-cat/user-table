@@ -6,6 +6,9 @@
       @input="onSearch"
       placeholder="Поиск по имени или электронной почте"
     />
+    <div class="notification">
+      Кликните на заголовок колонки для сортировки
+    </div>
     <table>
       <thead>
         <tr>
@@ -168,6 +171,11 @@ export default defineComponent({
 <style scoped>
 input {
   width: 500px;
+  height: 24px;
+}
+
+.notification {
+  margin: 16px 0px;
 }
 
 table {
