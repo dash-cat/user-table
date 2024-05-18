@@ -9,13 +9,48 @@
     <table>
       <thead>
         <tr>
-          <th @click="sort('picture.medium')">Аватар</th>
-          <th @click="sort('name.first')">ФИО</th>
-          <th @click="sort('gender')">Пол</th>
-          <th @click="sort('location.country')">Страна</th>
-          <th @click="sort('dob.date')">Дата рождения</th>
-          <th @click="sort('email')">Адрес электронной почты</th>
-          <th @click="sort('phone')">Телефон</th>
+          <th @click="sort('picture.medium')">
+            Аватар
+            <span v-if="sortKey === 'picture.medium'">
+              {{ sortOrder === 'asc' ? '⬆️' : '⬇️' }}
+            </span>
+          </th>
+          <th @click="sort('name.first')">
+            ФИО
+            <span v-if="sortKey === 'name.first'">
+              {{ sortOrder === 'asc' ? '⬆️' : '⬇️' }}
+            </span>
+          </th>
+          <th @click="sort('gender')">
+            Пол
+            <span v-if="sortKey === 'gender'">
+              {{ sortOrder === 'asc' ? '⬆️' : '⬇️' }}
+            </span>
+          </th>
+          <th @click="sort('location.country')">
+            Страна
+            <span v-if="sortKey === 'location.country'">
+              {{ sortOrder === 'asc' ? '⬆️' : '⬇️' }}
+            </span>
+          </th>
+          <th @click="sort('dob.date')">
+            Дата рождения
+            <span v-if="sortKey === 'dob.date'">
+              {{ sortOrder === 'asc' ? '⬆️' : '⬇️' }}
+            </span>
+          </th>
+          <th @click="sort('email')">
+            Адрес электронной почты
+            <span v-if="sortKey === 'email'">
+              {{ sortOrder === 'asc' ? '⬆️' : '⬇️' }}
+            </span>
+          </th>
+          <th @click="sort('phone')">
+            Телефон
+            <span v-if="sortKey === 'phone'">
+              {{ sortOrder === 'asc' ? '⬆️' : '⬇️' }}
+            </span>
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -90,13 +125,10 @@ export default defineComponent({
     };
 
     const sort = (key: string) => {
-      if (sortKeyLocal.value === key) {
-        const order = sortOrderLocal.value === 'asc' ? 'desc' : 'asc';
-        sortOrderLocal.value = order;
+      if (sortKey.value === key) {
+        const order = sortOrder.value === 'asc' ? 'desc' : 'asc';
         store.dispatch('setSortOrder', order);
       } else {
-        sortKeyLocal.value = key;
-        sortOrderLocal.value = 'asc';
         store.dispatch('setSortKey', key);
         store.dispatch('setSortOrder', 'asc');
       }
@@ -122,7 +154,10 @@ export default defineComponent({
       searchQueryLocal,
       sortKeyLocal,
       sortOrderLocal,
+      searchQuery,
       currentPage,
+      sortKey,
+      sortOrder,
       users,
       totalPages,
       onSearch,
