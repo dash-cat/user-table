@@ -6,6 +6,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/',
     name: 'HomeView',
     component: HomeView,
+    props: route => ({
+      searchQuery: route.query.search || '',
+      page: parseInt(route.query.page as string, 10) || 1,
+      sortKey: route.query.sortKey || '',
+      sortOrder: route.query.sortOrder || 'asc',
+    }),
   },
 ];
 
