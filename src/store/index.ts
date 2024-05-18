@@ -51,17 +51,8 @@ export default createStore({
     },
   },
   getters: {
-    filteredUsers(state) {
-      return state.users.filter(user =>
-        user.name.first.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
-        user.name.last.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
-        user.email.toLowerCase().includes(state.searchQuery.toLowerCase())
-      );
-    },
-    paginatedUsers(state, getters) {
-      const start = (state.currentPage - 1) * state.itemsPerPage;
-      const end = start + state.itemsPerPage;
-      const sortedUsers = [...getters.filteredUsers];
+    sortedUsers(state) {
+      const sortedUsers = [...state.users];
       if (state.sortKey) {
         sortedUsers.sort((a, b) => {
           const aValue = getValueByPath(a, state.sortKey);
@@ -72,7 +63,19 @@ export default createStore({
           return state.sortOrder === 'asc' ? result : -result;
         });
       }
-      return sortedUsers.slice(start, end);
+      return sortedUsers;
+    },
+    filteredUsers(state, getters) {
+      return getters.sortedUsers.filter((user: User) =>
+        user.name.first.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
+        user.name.last.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
+        user.email.toLowerCase().includes(state.searchQuery.toLowerCase())
+      );
+    },
+    paginatedUsers(state, getters) {
+      const start = (state.currentPage - 1) * state.itemsPerPage;
+      const end = start + state.itemsPerPage;
+      return getters.filteredUsers.slice(start, end);
     },
     totalPages(state, getters) {
       return Math.ceil(getters.filteredUsers.length / state.itemsPerPage);
