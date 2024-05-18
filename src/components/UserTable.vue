@@ -4,18 +4,18 @@
       type="text"
       v-model="searchQueryLocal"
       @input="onSearch"
-      placeholder="Search by name or email"
+      placeholder="Поиск по имени или электронной почте"
     />
     <table>
       <thead>
         <tr>
-          <th @click="sort('picture.medium')">Avatar</th>
-          <th @click="sort('name.first')">Name</th>
-          <th @click="sort('gender')">Gender</th>
-          <th @click="sort('location.country')">Country</th>
-          <th @click="sort('dob.date')">Date of Birth</th>
-          <th @click="sort('email')">Email</th>
-          <th @click="sort('phone')">Phone</th>
+          <th @click="sort('picture.medium')">Аватар</th>
+          <th @click="sort('name.first')">ФИО</th>
+          <th @click="sort('gender')">Пол</th>
+          <th @click="sort('location.country')">Страна</th>
+          <th @click="sort('dob.date')">Дата рождения</th>
+          <th @click="sort('email')">Адрес электронной почты</th>
+          <th @click="sort('phone')">Телефон</th>
         </tr>
       </thead>
       <tbody>
@@ -31,7 +31,7 @@
       </tbody>
     </table>
     <div>
-      <button @click="prevPage" :disabled="currentPage === 1">Previous</button>
+      <button @click="prevPage" :disabled="currentPage === 1">Пред.</button>
       <button
         v-for="page in totalPages"
         :key="page"
@@ -40,7 +40,7 @@
       >
         {{ page }}
       </button>
-      <button @click="nextPage" :disabled="currentPage === totalPages">Next</button>
+      <button @click="nextPage" :disabled="currentPage === totalPages">След.</button>
     </div>
   </div>
 </template>
@@ -60,7 +60,7 @@ export default defineComponent({
     const searchQueryLocal = ref<string>(route.query.search as string || '');
     const sortKeyLocal = ref<string>(route.query.sortKey as string || '');
     const sortOrderLocal = ref<string>(route.query.sortOrder as string || 'asc');
-    
+
     const searchQuery = computed(() => store.state.searchQuery);
     const currentPage = computed(() => store.state.currentPage);
     const sortKey = computed(() => store.state.sortKey);
@@ -136,6 +136,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
+input {
+  width: 500px;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
