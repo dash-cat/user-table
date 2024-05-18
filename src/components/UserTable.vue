@@ -46,66 +46,43 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, watch } from 'vue';
+import { defineComponent, computed, ref, watch, onMounted } from 'vue';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 export default defineComponent({
   name: 'UserTable',
-  props: {
-    searchQuery: {
-      type: String,
-      default: ''
-    },
-    page: {
-      type: Number,
-      default: 1
-    },
-    sortKey: {
-      type: String,
-      default: ''
-    },
-    sortOrder: {
-      type: String,
-      default: 'asc'
-    }
-  },
-  setup(props) {
+  setup() {
     const store = useStore();
     const router = useRouter();
+    const route = useRoute();
 
-    const searchQueryLocal = ref(props.searchQuery);
-    const sortKeyLocal = ref(props.sortKey);
-    const sortOrderLocal = ref(props.sortOrder);
+    const searchQueryLocal = ref<string>('');
+    const sortKeyLocal = ref<string>('');
+    const sortOrderLocal = ref<string>('asc');
 
-    const searchQuery = computed({
-      get: () => store.state.searchQuery,
-      set: (value) => store.dispatch('setSearchQuery', value)
-    });
-
-    const currentPage = computed({
-      get: () => store.state.currentPage,
-      set: (value) => store.dispatch('setCurrentPage', value)
-    });
-
-    const sortKey = computed({
-      get: () => store.state.sortKey,
-      set: (value) => store.dispatch('setSortKey', value)
-    });
-
-    const sortOrder = computed({
-      get: () => store.state.sortOrder,
-      set: (value) => store.dispatch('setSortOrder', value)
-    });
-
+    const searchQuery = computed(() => store.state.searchQuery);
+    const currentPage = computed(() => store.state.currentPage);
+    const sortKey = computed(() => store.state.sortKey);
+    const sortOrder = computed(() => store.state.sortOrder);
     const users = computed(() => store.getters.paginatedUsers);
     const totalPages = computed(() => store.getters.totalPages);
 
-    store.dispatch('fetchUsers').then(() => {
-      store.dispatch('setSearchQuery', props.searchQuery);
-      store.dispatch('setCurrentPage', props.page);
-      store.dispatch('setSortKey', props.sortKey);
-      store.dispatch('setSortOrder', props.sortOrder);
+    onMounted(() => {
+      const searchQuery = Array.isArray(route.query.search) ? route.query.search[0] : route.query.search || '';
+      const page = parseInt(route.query.page as string, 10) || 1;
+      const sortKey = Array.isArray(route.query.sortKey) ? route.query.sortKey[0] : route.query.sortKey || '';
+      const sortOrder = Array.isArray(route.query.sortOrder) ? route.query.sortOrder[0] : route.query.sortOrder || 'asc';
+
+      searchQueryLocal.value = String(searchQuery);
+      sortKeyLocal.value = String(sortKey);
+      sortOrderLocal.value = String(sortOrder);
+
+      store.dispatch('setSearchQuery', searchQuery);
+      store.dispatch('setCurrentPage', page);
+      store.dispatch('setSortKey', sortKey);
+      store.dispatch('setSortOrder', sortOrder);
+      store.dispatch('fetchUsers');
     });
 
     watch(
@@ -119,8 +96,7 @@ export default defineComponent({
             sortOrder: newSortOrder !== 'asc' ? newSortOrder : undefined,
           },
         });
-      },
-      { immediate: true }
+      }
     );
 
     const onSearch = (event: Event) => {
@@ -133,8 +109,11 @@ export default defineComponent({
     const sort = (key: string) => {
       if (sortKeyLocal.value === key) {
         const order = sortOrderLocal.value === 'asc' ? 'desc' : 'asc';
+        sortOrderLocal.value = order;
         store.dispatch('setSortOrder', order);
       } else {
+        sortKeyLocal.value = key;
+        sortOrderLocal.value = 'asc';
         store.dispatch('setSortKey', key);
         store.dispatch('setSortOrder', 'asc');
       }

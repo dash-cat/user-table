@@ -7,13 +7,30 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import UserTable from './components/UserTable.vue';
+import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
 
 @Options({
   components: {
     UserTable,
   },
 })
-export default class App extends Vue {}
+export default class App extends Vue {
+  mounted() {
+    const store = useStore();
+    const route = useRoute();
+
+    const searchQuery = route.query.search || '';
+    const page = parseInt(route.query.page as string, 10) || 1;
+    const sortKey = route.query.sortKey || '';
+    const sortOrder = route.query.sortOrder || 'asc';
+
+    store.dispatch('setSearchQuery', searchQuery);
+    store.dispatch('setCurrentPage', page);
+    store.dispatch('setSortKey', sortKey);
+    store.dispatch('setSortOrder', sortOrder);
+  }
+}
 </script>
 
 <style>
