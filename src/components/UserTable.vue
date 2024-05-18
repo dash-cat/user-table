@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, watch, onMounted } from 'vue';
+import { defineComponent, computed, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter, useRoute } from 'vue-router';
 
@@ -57,33 +57,16 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
 
-    const searchQueryLocal = ref<string>('');
-    const sortKeyLocal = ref<string>('');
-    const sortOrderLocal = ref<string>('asc');
-
+    const searchQueryLocal = ref<string>(route.query.search as string || '');
+    const sortKeyLocal = ref<string>(route.query.sortKey as string || '');
+    const sortOrderLocal = ref<string>(route.query.sortOrder as string || 'asc');
+    
     const searchQuery = computed(() => store.state.searchQuery);
     const currentPage = computed(() => store.state.currentPage);
     const sortKey = computed(() => store.state.sortKey);
     const sortOrder = computed(() => store.state.sortOrder);
     const users = computed(() => store.getters.paginatedUsers);
     const totalPages = computed(() => store.getters.totalPages);
-
-    onMounted(() => {
-      const searchQuery = Array.isArray(route.query.search) ? route.query.search[0] : route.query.search || '';
-      const page = parseInt(route.query.page as string, 10) || 1;
-      const sortKey = Array.isArray(route.query.sortKey) ? route.query.sortKey[0] : route.query.sortKey || '';
-      const sortOrder = Array.isArray(route.query.sortOrder) ? route.query.sortOrder[0] : route.query.sortOrder || 'asc';
-
-      searchQueryLocal.value = String(searchQuery);
-      sortKeyLocal.value = String(sortKey);
-      sortOrderLocal.value = String(sortOrder);
-
-      store.dispatch('setSearchQuery', searchQuery);
-      store.dispatch('setCurrentPage', page);
-      store.dispatch('setSortKey', sortKey);
-      store.dispatch('setSortOrder', sortOrder);
-      store.dispatch('fetchUsers');
-    });
 
     watch(
       () => [searchQuery.value, currentPage.value, sortKey.value, sortOrder.value],
