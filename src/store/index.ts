@@ -64,9 +64,11 @@ export default createStore({
       const sortedUsers = [...getters.filteredUsers];
       if (state.sortKey) {
         sortedUsers.sort((a, b) => {
+          const aValue = getValueByPath(a, state.sortKey);
+          const bValue = getValueByPath(b, state.sortKey);
           let result = 0;
-          if (a[state.sortKey] < b[state.sortKey]) result = -1;
-          if (a[state.sortKey] > b[state.sortKey]) result = 1;
+          if (aValue < bValue) result = -1;
+          if (aValue > bValue) result = 1;
           return state.sortOrder === 'asc' ? result : -result;
         });
       }
@@ -77,3 +79,7 @@ export default createStore({
     },
   },
 });
+
+function getValueByPath(obj: any, path: string) {
+  return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+}

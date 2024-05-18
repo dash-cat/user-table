@@ -9,12 +9,7 @@
     <table>
       <thead>
         <tr>
-          <th @click="sort('picture.medium')">
-            Аватар
-            <span v-if="sortKey === 'picture.medium'">
-              {{ sortOrder === 'asc' ? '⬆️' : '⬇️' }}
-            </span>
-          </th>
+          <th>Аватар</th>
           <th @click="sort('name.first')">
             ФИО
             <span v-if="sortKey === 'name.first'">
