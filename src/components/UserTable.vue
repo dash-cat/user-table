@@ -7,7 +7,7 @@
     <div class="notification">
       Кликните на заголовок колонки для сортировки
     </div>
-    <GenericTable :columns="columns" :rows="filteredUsers" />
+    <GenericTable :columns="columns" :rows="paginatedUsers" />
     <div v-if="filteredUsers.length === 0" class="no-results">
       Ничего не найдено
     </div>
@@ -26,7 +26,6 @@ import { defineComponent, computed, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter, useRoute } from 'vue-router';
 import GenericTable from './GenericTable.vue';
-import { User } from '@/types/User';
 import { ColumnModel } from '@/types/ColumnModel';
 import SearchInput from './SearchInput.vue';
 import PaginationStrip from './PaginationStrip.vue';
@@ -46,11 +45,9 @@ export default defineComponent({
     const searchQueryLocal = ref<string>(route.query.search as string || '');
     const currentPageLocal = ref<number>(Number(route.query.page) || 1);
 
-    const searchQuery = computed(() => store.state.searchQuery);
     const currentPage = computed(() => store.state.currentPage);
     const sortKey = computed(() => store.state.sortKey);
     const sortOrder = computed(() => store.state.sortOrder);
-    const users = computed(() => store.getters.paginatedUsers);
     const totalPages = computed(() => store.getters.totalPages);
 
     const columns: ColumnModel[] = [
@@ -63,13 +60,8 @@ export default defineComponent({
       { name: 'Телефон', isSortable: true, key: 'phone', kind: 'text' },
     ];
 
-    const filteredUsers = computed(() => {
-      return users.value.filter((user: User) =>
-        user.name.first.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        user.name.last.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchQuery.value.toLowerCase())
-      );
-    });
+    const filteredUsers = computed(() => store.getters.filteredUsers);
+    const paginatedUsers = computed(() => store.getters.paginatedUsers);
 
     watch(
       () => [searchQueryLocal.value, currentPageLocal.value, sortKey.value, sortOrder.value],
@@ -114,6 +106,7 @@ export default defineComponent({
       currentPageLocal,
       columns,
       filteredUsers,
+      paginatedUsers,
       currentPage,
       totalPages,
       onSearch,
