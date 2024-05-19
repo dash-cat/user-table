@@ -9,60 +9,7 @@
     <div class="notification">
       Кликните на заголовок колонки для сортировки
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Аватар</th>
-          <th @click="sort('name.first')">
-            ФИО
-            <span v-if="sortKey === 'name.first'">
-              {{ sortOrder === 'asc' ? '⬆️' : '⬇️' }}
-            </span>
-          </th>
-          <th @click="sort('gender')">
-            Пол
-            <span v-if="sortKey === 'gender'">
-              {{ sortOrder === 'asc' ? '⬆️' : '⬇️' }}
-            </span>
-          </th>
-          <th @click="sort('location.country')">
-            Страна
-            <span v-if="sortKey === 'location.country'">
-              {{ sortOrder === 'asc' ? '⬆️' : '⬇️' }}
-            </span>
-          </th>
-          <th @click="sort('dob.date')">
-            Дата рождения
-            <span v-if="sortKey === 'dob.date'">
-              {{ sortOrder === 'asc' ? '⬆️' : '⬇️' }}
-            </span>
-          </th>
-          <th @click="sort('email')">
-            Адрес электронной почты
-            <span v-if="sortKey === 'email'">
-              {{ sortOrder === 'asc' ? '⬆️' : '⬇️' }}
-            </span>
-          </th>
-          <th @click="sort('phone')">
-            Телефон
-            <span v-if="sortKey === 'phone'">
-              {{ sortOrder === 'asc' ? '⬆️' : '⬇️' }}
-            </span>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="user in users" :key="user.email">
-          <td><img :src="user.picture.medium" alt="avatar" /></td>
-          <td>{{ user.name.first }} {{ user.name.last }}</td>
-          <td>{{ user.gender }}</td>
-          <td>{{ user.location.country }}</td>
-          <td>{{ new Date(user.dob.date).toLocaleDateString() }}</td>
-          <td>{{ user.email }}</td>
-          <td>{{ user.phone }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <GenericTable :columns="columns" :rows="filteredUsers" />
     <div>
       <button @click="prevPage" :disabled="currentPage === 1">Пред.</button>
       <button
@@ -82,17 +29,20 @@
 import { defineComponent, computed, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter, useRoute } from 'vue-router';
+import GenericTable from './GenericTable.vue';
+import { User } from '@/types/User';
 
 export default defineComponent({
   name: 'UserTable',
+  components: {
+    GenericTable,
+  },
   setup() {
     const store = useStore();
     const router = useRouter();
     const route = useRoute();
 
     const searchQueryLocal = ref<string>(route.query.search as string || '');
-    const sortKeyLocal = ref<string>(route.query.sortKey as string || '');
-    const sortOrderLocal = ref<string>(route.query.sortOrder as string || 'asc');
 
     const searchQuery = computed(() => store.state.searchQuery);
     const currentPage = computed(() => store.state.currentPage);
@@ -100,6 +50,24 @@ export default defineComponent({
     const sortOrder = computed(() => store.state.sortOrder);
     const users = computed(() => store.getters.paginatedUsers);
     const totalPages = computed(() => store.getters.totalPages);
+
+    const columns = [
+      { name: 'Аватар', isSortable: false, key: 'picture.medium' },
+      { name: 'ФИО', isSortable: true, key: 'name.first' },
+      { name: 'Пол', isSortable: true, key: 'gender' },
+      { name: 'Страна', isSortable: true, key: 'location.country' },
+      { name: 'Дата рождения', isSortable: true, key: 'dob.date' },
+      { name: 'Адрес электронной почты', isSortable: true, key: 'email' },
+      { name: 'Телефон', isSortable: true, key: 'phone' },
+    ];
+
+    const filteredUsers = computed(() => {
+      return users.value.filter((user: User) =>
+        user.name.first.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        user.name.last.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchQuery.value.toLowerCase())
+      );
+    });
 
     watch(
       () => [searchQuery.value, currentPage.value, sortKey.value, sortOrder.value],
@@ -122,16 +90,6 @@ export default defineComponent({
       store.dispatch('setCurrentPage', 1);
     };
 
-    const sort = (key: string) => {
-      if (sortKey.value === key) {
-        const order = sortOrder.value === 'asc' ? 'desc' : 'asc';
-        store.dispatch('setSortOrder', order);
-      } else {
-        store.dispatch('setSortKey', key);
-        store.dispatch('setSortOrder', 'asc');
-      }
-    };
-
     const prevPage = () => {
       if (currentPage.value > 1) {
         store.dispatch('setCurrentPage', currentPage.value - 1);
@@ -150,16 +108,11 @@ export default defineComponent({
 
     return {
       searchQueryLocal,
-      sortKeyLocal,
-      sortOrderLocal,
-      searchQuery,
+      columns,
+      filteredUsers,
       currentPage,
-      sortKey,
-      sortOrder,
-      users,
       totalPages,
       onSearch,
-      sort,
       prevPage,
       nextPage,
       goToPage,
@@ -169,28 +122,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
-input {
-  width: 500px;
-  height: 24px;
-}
-
 .notification {
   margin: 16px 0px;
 }
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-th, td {
-  padding: 8px;
-  text-align: left;
-  border: 1px solid #ddd;
-}
-th {
-  cursor: pointer;
-}
-.active {
+button.active {
   font-weight: bold;
 }
 </style>
