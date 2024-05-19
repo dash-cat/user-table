@@ -17,10 +17,18 @@
         </tr>
         <tr v-else v-for="row in sortedRows" :key="row.id">
           <td v-for="column in columns" :key="column.key">
-            <img v-if="column.isImage" :src="getValueByPath(row, column.key)" alt="image" />
-            <span v-else>
+            <template v-if="column.kind === 'image'">
+              <img :src="getValueByPath(row, column.key)" alt="image" />
+            </template>
+            <template v-else-if="column.kind === 'email'">
+              <a :href="`mailto:${getValueByPath(row, column.key)}`">{{ getValueByPath(row, column.key) }}</a>
+            </template>
+            <template v-else-if="column.kind === 'date'">
+              {{ new Date(getValueByPath(row, column.key)).toLocaleDateString('ru-RU') }}
+            </template>
+            <template v-else>
               {{ getValueByPath(row, column.key) }}
-            </span>
+            </template>
           </td>
         </tr>
       </tbody>
@@ -35,7 +43,7 @@ export default defineComponent({
   name: 'GenericTable',
   props: {
     columns: {
-      type: Array as PropType<Array<{ name: string; isSortable: boolean; key: string; isImage?: boolean }>>,
+      type: Array as PropType<Array<{ name: string; isSortable: boolean; key: string; kind: 'text' | 'date' | 'image' | 'email' }>>,
       required: true,
     },
     rows: {

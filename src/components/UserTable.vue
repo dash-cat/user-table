@@ -56,13 +56,13 @@ export default defineComponent({
     const totalPages = computed(() => store.getters.totalPages);
 
     const columns = [
-      { name: 'Аватар', isSortable: false, key: 'picture.medium', isImage: true },
-      { name: 'ФИО', isSortable: true, key: 'name.first' },
-      { name: 'Пол', isSortable: true, key: 'gender' },
-      { name: 'Страна', isSortable: true, key: 'location.country' },
-      { name: 'Дата рождения', isSortable: true, key: 'dob.date' },
-      { name: 'Адрес электронной почты', isSortable: true, key: 'email' },
-      { name: 'Телефон', isSortable: true, key: 'phone' },
+      { name: 'Аватар', isSortable: false, key: 'picture.medium', kind: 'image' },
+      { name: 'ФИО', isSortable: true, key: 'name.first', kind: 'text' },
+      { name: 'Пол', isSortable: true, key: 'gender', kind: 'text' },
+      { name: 'Страна', isSortable: true, key: 'location.country', kind: 'text' },
+      { name: 'Дата рождения', isSortable: true, key: 'dob.date', kind: 'date' },
+      { name: 'Адрес электронной почты', isSortable: true, key: 'email', kind: 'email' },
+      { name: 'Телефон', isSortable: true, key: 'phone', kind: 'text' },
     ];
 
     const filteredUsers = computed(() => {
@@ -137,7 +137,8 @@ export default defineComponent({
 
 .search-input {
   padding: 12px;
-  width: 500px;
+  width: 100%;
+  max-width: 500px;
   margin-bottom: 20px;
   border: 1px solid #ccc;
   border-radius: 4px;
