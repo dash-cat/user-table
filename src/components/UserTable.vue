@@ -11,7 +11,10 @@
       Кликните на заголовок колонки для сортировки
     </div>
     <GenericTable :columns="columns" :rows="filteredUsers" />
-    <div class="pagination">
+    <div v-if="filteredUsers.length === 0" class="no-results">
+      Ничего не найдено
+    </div>
+    <div v-else class="pagination">
       <button @click="prevPage" :disabled="currentPage === 1">Пред.</button>
       <button
         v-for="page in totalPages"
@@ -181,5 +184,12 @@ export default defineComponent({
   font-weight: bold;
   background-color: #007bff;
   color: white;
+}
+
+.no-results {
+  text-align: center;
+  margin: 16px 0;
+  font-size: 16px;
+  color: #999;
 }
 </style>
