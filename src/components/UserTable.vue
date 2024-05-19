@@ -1,11 +1,8 @@
 <template>
   <div class="user-table-container">
-    <input
-      type="text"
+    <SearchInput
       v-model="searchQueryLocal"
-      @input="onSearch"
       placeholder="Поиск по имени или электронной почте"
-      class="search-input"
     />
     <div class="notification">
       Кликните на заголовок колонки для сортировки
@@ -14,18 +11,13 @@
     <div v-if="filteredUsers.length === 0" class="no-results">
       Ничего не найдено
     </div>
-    <div v-else class="pagination">
-      <button @click="prevPage" :disabled="currentPage === 1">Пред.</button>
-      <button
-        v-for="page in totalPages"
-        :key="page"
-        @click="goToPage(page)"
-        :class="{ active: currentPage === page }"
-      >
-        {{ page }}
-      </button>
-      <button @click="nextPage" :disabled="currentPage === totalPages">След.</button>
-    </div>
+    <PaginationStrip
+      :currentPage="currentPage"
+      :totalPages="totalPages"
+      @prevPage="prevPage"
+      @nextPage="nextPage"
+      @goToPage="goToPage"
+    />
   </div>
 </template>
 
@@ -36,11 +28,15 @@ import { useRouter, useRoute } from 'vue-router';
 import GenericTable from './GenericTable.vue';
 import { User } from '@/types/User';
 import { ColumnModel } from '@/types/ColumnModel';
+import SearchInput from './SearchInput.vue';
+import PaginationStrip from './PaginationStrip.vue';
 
 export default defineComponent({
   name: 'UserTable',
   components: {
     GenericTable,
+    SearchInput,
+    PaginationStrip,
   },
   setup() {
     const store = useStore();
@@ -88,10 +84,9 @@ export default defineComponent({
       }
     );
 
-    const onSearch = (event: Event) => {
-      const target = event.target as HTMLInputElement;
-      searchQueryLocal.value = target.value;
-      store.dispatch('setSearchQuery', target.value);
+    const onSearch = (value: string) => {
+      searchQueryLocal.value = value;
+      store.dispatch('setSearchQuery', value);
       store.dispatch('setCurrentPage', 1);
     };
 
@@ -136,56 +131,10 @@ export default defineComponent({
   border-radius: 8px;
 }
 
-.search-input {
-  padding: 12px;
-  width: 100%;
-  max-width: 500px;
-  margin-bottom: 20px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px;
-}
-
-.search-input:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
-  outline: none;
-}
-
 .notification {
   margin: 16px 0px;
   font-size: 14px;
   color: #555;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  margin: 16px 0;
-}
-
-.pagination button {
-  margin: 0 4px;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  background-color: #f9f9f9;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.pagination button:hover {
-  background-color: #f1f1f1;
-}
-
-.pagination button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.pagination button.active {
-  font-weight: bold;
-  background-color: #007bff;
-  color: white;
 }
 
 .no-results {
