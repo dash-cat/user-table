@@ -1,10 +1,11 @@
 <template>
-  <div>
+  <div class="user-table-container">
     <input
       type="text"
       v-model="searchQueryLocal"
       @input="onSearch"
       placeholder="Поиск по имени или электронной почте"
+      class="search-input"
     />
     <div class="notification">
       Кликните на заголовок колонки для сортировки
@@ -122,8 +123,34 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.user-table-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.search-input {
+  padding: 12px;
+  width: 500px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.search-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
+  outline: none;
+}
+
 .notification {
   margin: 16px 0px;
+  font-size: 14px;
+  color: #555;
 }
 
 .pagination {
@@ -138,6 +165,7 @@ export default defineComponent({
   border: 1px solid #ddd;
   background-color: #f9f9f9;
   cursor: pointer;
+  border-radius: 4px;
 }
 
 .pagination button:hover {
@@ -151,6 +179,7 @@ export default defineComponent({
 
 .pagination button.active {
   font-weight: bold;
-  background-color: #e1e1e1;
+  background-color: #007bff;
+  color: white;
 }
 </style>
