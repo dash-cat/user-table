@@ -38,12 +38,13 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed, PropType } from 'vue';
+import { ColumnKind } from '@/types/ColumnKind';
 
 export default defineComponent({
   name: 'GenericTable',
   props: {
     columns: {
-      type: Array as PropType<Array<{ name: string; isSortable: boolean; key: string; kind: 'text' | 'date' | 'image' | 'email' }>>,
+      type: Array as PropType<Array<{ name: string; isSortable: boolean; key: string; kind: ColumnKind }>>,
       required: true,
     },
     rows: {

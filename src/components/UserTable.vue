@@ -35,6 +35,7 @@ import { useStore } from 'vuex';
 import { useRouter, useRoute } from 'vue-router';
 import GenericTable from './GenericTable.vue';
 import { User } from '@/types/User';
+import { ColumnKind } from '@/types/ColumnKind';
 
 export default defineComponent({
   name: 'UserTable',
@@ -55,7 +56,7 @@ export default defineComponent({
     const users = computed(() => store.getters.paginatedUsers);
     const totalPages = computed(() => store.getters.totalPages);
 
-    const columns = [
+    const columns: Array<{ name: string; isSortable: boolean; key: string; kind: ColumnKind }> = [
       { name: 'Аватар', isSortable: false, key: 'picture.medium', kind: 'image' },
       { name: 'ФИО', isSortable: true, key: 'name.first', kind: 'text' },
       { name: 'Пол', isSortable: true, key: 'gender', kind: 'text' },
