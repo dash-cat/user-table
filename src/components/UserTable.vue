@@ -10,7 +10,7 @@
       Кликните на заголовок колонки для сортировки
     </div>
     <GenericTable :columns="columns" :rows="filteredUsers" />
-    <div>
+    <div class="pagination">
       <button @click="prevPage" :disabled="currentPage === 1">Пред.</button>
       <button
         v-for="page in totalPages"
@@ -125,7 +125,32 @@ export default defineComponent({
 .notification {
   margin: 16px 0px;
 }
-button.active {
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0;
+}
+
+.pagination button {
+  margin: 0 4px;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+  cursor: pointer;
+}
+
+.pagination button:hover {
+  background-color: #f1f1f1;
+}
+
+.pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.pagination button.active {
   font-weight: bold;
+  background-color: #e1e1e1;
 }
 </style>

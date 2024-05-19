@@ -1,6 +1,6 @@
 <template>
     <div>
-      <table>
+      <table class="generic-table">
         <thead>
           <tr>
             <th v-for="column in columns" :key="column.key" @click="column.isSortable ? sort(column.key) : null">
@@ -82,10 +82,36 @@
   </script>
   
   <style scoped>
-  th {
-    cursor: pointer;
+  .generic-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
   }
-  img {
+  
+  .generic-table th, .generic-table td {
+    padding: 12px;
+    text-align: left;
+    border: 1px solid #ddd;
+  }
+  
+  .generic-table th {
+    cursor: pointer;
+    background-color: #f9f9f9;
+  }
+  
+  .generic-table th:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .generic-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .generic-table tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .generic-table img {
     max-width: 100px;
     height: auto;
   }
