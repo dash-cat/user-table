@@ -52,7 +52,7 @@ export default defineComponent({
     const totalPages = computed(() => store.getters.totalPages);
 
     const columns = [
-      { name: 'Аватар', isSortable: false, key: 'picture.medium' },
+      { name: 'Аватар', isSortable: false, key: 'picture.medium', isImage: true },
       { name: 'ФИО', isSortable: true, key: 'name.first' },
       { name: 'Пол', isSortable: true, key: 'gender' },
       { name: 'Страна', isSortable: true, key: 'location.country' },

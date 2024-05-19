@@ -14,7 +14,10 @@
         <tbody>
           <tr v-for="row in sortedRows" :key="row.id">
             <td v-for="column in columns" :key="column.key">
-              {{ getValueByPath(row, column.key) }}
+              <img v-if="column.isImage" :src="getValueByPath(row, column.key)" alt="image" />
+              <span v-else>
+                {{ getValueByPath(row, column.key) }}
+              </span>
             </td>
           </tr>
         </tbody>
@@ -29,7 +32,7 @@
     name: 'GenericTable',
     props: {
       columns: {
-        type: Array as PropType<Array<{ name: string; isSortable: boolean; key: string }>>,
+        type: Array as PropType<Array<{ name: string; isSortable: boolean; key: string; isImage?: boolean }>>,
         required: true,
       },
       rows: {
@@ -81,6 +84,10 @@
   <style scoped>
   th {
     cursor: pointer;
+  }
+  img {
+    max-width: 100px;
+    height: auto;
   }
   </style>
   
