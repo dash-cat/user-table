@@ -44,6 +44,7 @@ export default defineComponent({
     const route = useRoute();
 
     const searchQueryLocal = ref<string>(route.query.search as string || '');
+    const currentPageLocal = ref<number>(Number(route.query.page) || 1);
 
     const searchQuery = computed(() => store.state.searchQuery);
     const currentPage = computed(() => store.state.currentPage);
@@ -71,7 +72,7 @@ export default defineComponent({
     });
 
     watch(
-      () => [searchQuery.value, currentPage.value, sortKey.value, sortOrder.value],
+      () => [searchQueryLocal.value, currentPageLocal.value, sortKey.value, sortOrder.value],
       ([newSearchQuery, newPage, newSortKey, newSortOrder]) => {
         router.push({
           query: {
@@ -81,6 +82,8 @@ export default defineComponent({
             sortOrder: newSortOrder !== 'asc' ? newSortOrder : undefined,
           },
         });
+        store.dispatch('setSearchQuery', newSearchQuery);
+        store.dispatch('setCurrentPage', newPage);
       }
     );
 
@@ -91,23 +94,24 @@ export default defineComponent({
     };
 
     const prevPage = () => {
-      if (currentPage.value > 1) {
-        store.dispatch('setCurrentPage', currentPage.value - 1);
+      if (currentPageLocal.value > 1) {
+        currentPageLocal.value -= 1;
       }
     };
 
     const nextPage = () => {
-      if (currentPage.value < totalPages.value) {
-        store.dispatch('setCurrentPage', currentPage.value + 1);
+      if (currentPageLocal.value < totalPages.value) {
+        currentPageLocal.value += 1;
       }
     };
 
     const goToPage = (page: number) => {
-      store.dispatch('setCurrentPage', page);
+      currentPageLocal.value = page;
     };
 
     return {
       searchQueryLocal,
+      currentPageLocal,
       columns,
       filteredUsers,
       currentPage,
