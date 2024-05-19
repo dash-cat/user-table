@@ -8,11 +8,11 @@
       Кликните на заголовок колонки для сортировки
     </div>
     <GenericTable :columns="columns" :rows="paginatedUsers" />
-    <div v-if="filteredUsers.length === 0" class="no-results">
+    <div v-if="paginatedUsers.length === 0" class="no-results">
       Ничего не найдено
     </div>
     <PaginationStrip
-      :currentPage="currentPage"
+      :currentPage="currentPageLocal"
       :totalPages="totalPages"
       @prevPage="prevPage"
       @nextPage="nextPage"
@@ -48,6 +48,7 @@ export default defineComponent({
     const currentPage = computed(() => store.state.currentPage);
     const sortKey = computed(() => store.state.sortKey);
     const sortOrder = computed(() => store.state.sortOrder);
+    const paginatedUsers = computed(() => store.getters.paginatedUsers);
     const totalPages = computed(() => store.getters.totalPages);
 
     const columns: ColumnModel[] = [
@@ -60,12 +61,14 @@ export default defineComponent({
       { name: 'Телефон', isSortable: true, key: 'phone', kind: 'text' },
     ];
 
-    const filteredUsers = computed(() => store.getters.filteredUsers);
-    const paginatedUsers = computed(() => store.getters.paginatedUsers);
-
     watch(
       () => [searchQueryLocal.value, currentPageLocal.value, sortKey.value, sortOrder.value],
       ([newSearchQuery, newPage, newSortKey, newSortOrder]) => {
+        if (newPage < 1) {
+          newPage = 1;
+        } else if (newPage > totalPages.value) {
+          newPage = totalPages.value;
+        }
         router.push({
           query: {
             search: newSearchQuery || undefined,
@@ -79,8 +82,19 @@ export default defineComponent({
       }
     );
 
+    watch(
+      () => totalPages.value,
+      (newTotalPages) => {
+        if (currentPageLocal.value > newTotalPages) {
+          currentPageLocal.value = newTotalPages;
+          store.dispatch('setCurrentPage', newTotalPages);
+        }
+      }
+    );
+
     const onSearch = (value: string) => {
       searchQueryLocal.value = value;
+      currentPageLocal.value = 1;
       store.dispatch('setSearchQuery', value);
       store.dispatch('setCurrentPage', 1);
     };
@@ -88,24 +102,28 @@ export default defineComponent({
     const prevPage = () => {
       if (currentPageLocal.value > 1) {
         currentPageLocal.value -= 1;
+        store.dispatch('setCurrentPage', currentPageLocal.value);
       }
     };
 
     const nextPage = () => {
       if (currentPageLocal.value < totalPages.value) {
         currentPageLocal.value += 1;
+        store.dispatch('setCurrentPage', currentPageLocal.value);
       }
     };
 
     const goToPage = (page: number) => {
-      currentPageLocal.value = page;
+      if (page >= 1 && page <= totalPages.value) {
+        currentPageLocal.value = page;
+        store.dispatch('setCurrentPage', page);
+      }
     };
 
     return {
       searchQueryLocal,
       currentPageLocal,
       columns,
-      filteredUsers,
       paginatedUsers,
       currentPage,
       totalPages,
