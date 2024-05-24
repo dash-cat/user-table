@@ -22,13 +22,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, watch } from 'vue';
-import { useStore } from 'vuex';
-import { useRouter, useRoute } from 'vue-router';
+import { defineComponent, ref, computed, watch, onMounted } from 'vue';
+import axios from 'axios';
 import GenericTable from './GenericTable.vue';
-import { ColumnModel } from '@/types/ColumnModel';
 import SearchInput from './SearchInput.vue';
 import PaginationStrip from './PaginationStrip.vue';
+import { User } from '@/types/User';
+import { getValueByPath, includesIgnoringCase } from '@/utils';
+import { ColumnModel } from '@/types/ColumnModel';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
   name: 'UserTable',
@@ -38,18 +40,100 @@ export default defineComponent({
     PaginationStrip,
   },
   setup() {
-    const store = useStore();
+    const users = ref<User[]>([]);
+    const searchQueryLocal = ref<string>('');
+    const currentPageLocal = ref<number>(1);
+    const itemsPerPage = ref<number>(20);
+    const sortKey = ref<string>('');
+    const sortOrder = ref<string>('asc');
     const router = useRouter();
-    const route = useRoute();
 
-    const searchQueryLocal = ref<string>(route.query.search as string || '');
-    const currentPageLocal = ref<number>(Number(route.query.page) || 1);
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get('/api.json');
+        users.value = response.data.results;
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
 
-    const currentPage = computed(() => store.state.currentPage);
-    const sortKey = computed(() => store.state.sortKey);
-    const sortOrder = computed(() => store.state.sortOrder);
-    const paginatedUsers = computed(() => store.getters.paginatedUsers);
-    const totalPages = computed(() => store.getters.totalPages);
+    onMounted(fetchUsers);
+
+    const sortedUsers = computed(() => {
+      const sorted = [...users.value];
+      if (sortKey.value) {
+        sorted.sort((a, b) => {
+          const aValue = getValueByPath(a, sortKey.value);
+          const bValue = getValueByPath(b, sortKey.value);
+          let result = 0;
+          if (aValue < bValue) result = -1;
+          if (aValue > bValue) result = 1;
+          return sortOrder.value === 'asc' ? result : -result;
+        });
+      }
+      return sorted;
+    });
+
+    const filteredUsers = computed(() => {
+      const query = searchQueryLocal.value.toLowerCase();
+      return sortedUsers.value.filter((user: User) =>
+        includesIgnoringCase(user.name.first, query) ||
+        includesIgnoringCase(user.name.last, query) ||
+        includesIgnoringCase(user.email, query)
+      );
+    });
+
+    const paginatedUsers = computed(() => {
+      const start = (currentPageLocal.value - 1) * itemsPerPage.value;
+      const end = start + itemsPerPage.value;
+      return filteredUsers.value.slice(start, end);
+    });
+
+    const totalPages = computed(() => {
+      return Math.ceil(filteredUsers.value.length / itemsPerPage.value);
+    });
+
+    watch(
+      () => [searchQueryLocal.value, currentPageLocal.value, sortKey.value, sortOrder.value],
+      ([newSearchQuery, newPage, newSortKey, newSortOrder]) => {
+        if (newPage < 1) {
+          newPage = 1;
+        } else if (newPage > totalPages.value) {
+          newPage = totalPages.value;
+        }
+        router.replace({
+          query: {
+            search: newSearchQuery || undefined,
+            page: newPage !== 1 ? newPage.toString() : undefined,
+            sortKey: newSortKey || undefined,
+            sortOrder: newSortOrder !== 'asc' ? newSortOrder : undefined,
+          },
+        });
+      }
+    );
+
+    const onSearch = (value: string) => {
+      searchQueryLocal.value = value;
+      currentPageLocal.value = 1;
+    };
+
+    const prevPage = () => {
+      if (currentPageLocal.value > 1) {
+        currentPageLocal.value -= 1;
+      }
+    };
+
+    const nextPage = () => {
+      if (currentPageLocal.value < totalPages.value) {
+        currentPageLocal.value += 1;
+      }
+    };
+
+    const goToPage = (page: number) => {
+      if (page >= 1 && page <= totalPages.value) {
+        currentPageLocal.value = page;
+      }
+    };
 
     const columns: ColumnModel[] = [
       { name: 'Аватар', isSortable: false, key: 'picture.medium', kind: 'image' },
@@ -61,74 +145,11 @@ export default defineComponent({
       { name: 'Телефон', isSortable: true, key: 'phone', kind: 'text' },
     ];
 
-    watch(
-      () => [searchQueryLocal.value, currentPageLocal.value, sortKey.value, sortOrder.value],
-      ([newSearchQuery, newPage, newSortKey, newSortOrder]) => {
-        if (newPage < 1) {
-          newPage = 1;
-        } else if (newPage > totalPages.value) {
-          newPage = totalPages.value;
-        }
-        router.push({
-          query: {
-            search: newSearchQuery || undefined,
-            page: newPage !== 1 ? newPage.toString() : undefined,
-            sortKey: newSortKey || undefined,
-            sortOrder: newSortOrder !== 'asc' ? newSortOrder : undefined,
-          },
-        });
-        store.dispatch('setFilters', {
-          query: newSearchQuery,
-          page: newPage,
-          key: newSortKey,
-          order: newSortOrder,
-        });
-      }
-    );
-
-    watch(
-      () => totalPages.value,
-      (newTotalPages) => {
-        if (currentPageLocal.value > newTotalPages) {
-          currentPageLocal.value = newTotalPages;
-          store.dispatch('setFilters', { page: newTotalPages });
-        }
-      }
-    );
-
-    const onSearch = (value: string) => {
-      searchQueryLocal.value = value;
-      currentPageLocal.value = 1;
-      store.dispatch('setFilters', { query: value, page: 1 });
-    };
-
-    const prevPage = () => {
-      if (currentPageLocal.value > 1) {
-        currentPageLocal.value -= 1;
-        store.dispatch('setFilters', { page: currentPageLocal.value });
-      }
-    };
-
-    const nextPage = () => {
-      if (currentPageLocal.value < totalPages.value) {
-        currentPageLocal.value += 1;
-        store.dispatch('setFilters', { page: currentPageLocal.value });
-      }
-    };
-
-    const goToPage = (page: number) => {
-      if (page >= 1 && page <= totalPages.value) {
-        currentPageLocal.value = page;
-        store.dispatch('setFilters', { page });
-      }
-    };
-
     return {
       searchQueryLocal,
       currentPageLocal,
       columns,
       paginatedUsers,
-      currentPage,
       totalPages,
       onSearch,
       prevPage,
