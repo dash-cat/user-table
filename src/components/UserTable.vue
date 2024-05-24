@@ -77,8 +77,12 @@ export default defineComponent({
             sortOrder: newSortOrder !== 'asc' ? newSortOrder : undefined,
           },
         });
-        store.dispatch('setSearchQuery', newSearchQuery);
-        store.dispatch('setCurrentPage', newPage);
+        store.dispatch('setFilters', {
+          query: newSearchQuery,
+          page: newPage,
+          key: newSortKey,
+          order: newSortOrder,
+        });
       }
     );
 
@@ -87,7 +91,7 @@ export default defineComponent({
       (newTotalPages) => {
         if (currentPageLocal.value > newTotalPages) {
           currentPageLocal.value = newTotalPages;
-          store.dispatch('setCurrentPage', newTotalPages);
+          store.dispatch('setFilters', { page: newTotalPages });
         }
       }
     );
@@ -95,28 +99,27 @@ export default defineComponent({
     const onSearch = (value: string) => {
       searchQueryLocal.value = value;
       currentPageLocal.value = 1;
-      store.dispatch('setSearchQuery', value);
-      store.dispatch('setCurrentPage', 1);
+      store.dispatch('setFilters', { query: value, page: 1 });
     };
 
     const prevPage = () => {
       if (currentPageLocal.value > 1) {
         currentPageLocal.value -= 1;
-        store.dispatch('setCurrentPage', currentPageLocal.value);
+        store.dispatch('setFilters', { page: currentPageLocal.value });
       }
     };
 
     const nextPage = () => {
       if (currentPageLocal.value < totalPages.value) {
         currentPageLocal.value += 1;
-        store.dispatch('setCurrentPage', currentPageLocal.value);
+        store.dispatch('setFilters', { page: currentPageLocal.value });
       }
     };
 
     const goToPage = (page: number) => {
       if (page >= 1 && page <= totalPages.value) {
         currentPageLocal.value = page;
-        store.dispatch('setCurrentPage', page);
+        store.dispatch('setFilters', { page });
       }
     };
 

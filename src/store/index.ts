@@ -43,17 +43,10 @@ export default createStore({
         console.error('Error fetching users:', error);
       }
     },
-    setSearchQuery({ commit }, query) {
-      commit('setFilters', { query });
-    },
-    setCurrentPage({ commit }, page) {
-      commit('setFilters', { page });
-    },
-    setSortKey({ commit }, key) {
-      commit('setFilters', { key });
-    },
-    setSortOrder({ commit }, order) {
-      commit('setFilters', { order });
+    setFilters({ commit }, filters: {
+      query: string, page: number, key: string, order: string
+    }) {
+      commit('setFilters', filters);
     },
   },
   getters: {
