@@ -72,10 +72,11 @@ export default createStore({
       return sortedUsers;
     },
     filteredUsers(state, getters) {
+      const query = state.searchQuery.toLowerCase();
       return getters.sortedUsers.filter((user: User) =>
-        user.name.first.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
-        user.name.last.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
-        user.email.toLowerCase().includes(state.searchQuery.toLowerCase())
+        includesIgnoringCase(user.name.first, query) ||
+        includesIgnoringCase(user.name.last, query) ||
+        includesIgnoringCase(user.email, query)
       );
     },
     paginatedUsers(state, getters) {
@@ -91,4 +92,8 @@ export default createStore({
 
 function getValueByPath(obj: any, path: string) {
   return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+}
+
+function includesIgnoringCase(source: string, target: string): boolean {
+  return source.toLowerCase().includes(target.toLowerCase());
 }
