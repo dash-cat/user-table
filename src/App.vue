@@ -5,31 +5,9 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
-import { useStore } from 'vuex';
-import { useRoute } from 'vue-router';
+import { Vue } from 'vue-class-component';
 
-@Options({
-  components: {},
-})
-export default class App extends Vue {
-  mounted() {
-    const store = useStore();
-    const route = useRoute();
-
-    const searchQuery = route.query.search || '';
-    const page = parseInt(route.query.page as string, 10) || 1;
-    const sortKey = route.query.sortKey || '';
-    const sortOrder = route.query.sortOrder || 'asc';
-
-    store.commit('setFilters', {
-      query: searchQuery,
-      page,
-      key: sortKey,
-      order: sortOrder
-    });
-  }
-}
+export default class App extends Vue {}
 </script>
 
 <style>
