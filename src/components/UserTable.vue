@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, watch, onMounted } from 'vue';
+import { defineComponent, ref, computed, watch, onMounted, PropType } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import GenericTable from './GenericTable.vue';
@@ -45,13 +45,30 @@ export default defineComponent({
     SearchInput,
     PaginationStrip,
   },
-  setup() {
+  props: {
+    searchQuery: {
+      type: String,
+      required: true,
+    },
+    page: {
+      type: Number,
+      required: true,
+    },
+    sortKey: {
+      type: String,
+      required: true,
+    },
+    sortOrder: {
+      type: String as PropType<'asc' | 'desc'>,
+      required: true,
+    },
+  },
+  setup(props) {
     const users = ref<User[]>([]);
-    const searchQueryLocal = ref<string>('');
-    const currentPageLocal = ref<number>(1);
+    const searchQueryLocal = ref<string>(props.searchQuery);
+    const currentPageLocal = ref<number>(props.page);
     const itemsPerPage = ref<number>(20);
-    const sortKey = ref<string>('');
-    const sortOrder = ref<'asc' | 'desc'>('asc');
+    const sortKey = ref<string>(props.sortKey);
     const sortedColumnIndex = ref<number>(-1);
 
     const router = useRouter();
@@ -76,7 +93,7 @@ export default defineComponent({
           let result = 0;
           if (aValue < bValue) result = -1;
           if (aValue > bValue) result = 1;
-          return sortOrder.value === 'asc' ? result : -result;
+          return props.sortOrder === 'asc' ? result : -result;
         });
       }
       return sorted;
@@ -102,7 +119,7 @@ export default defineComponent({
     });
 
     watch(
-      () => [searchQueryLocal.value, currentPageLocal.value, sortKey.value, sortOrder.value],
+      () => [searchQueryLocal.value, currentPageLocal.value, sortKey.value, props.sortOrder],
       ([newSearchQuery, newPage, newSortKey, newSortOrder]) => {
         if ((newPage as number) < 1) {
           newPage = 1;
@@ -144,13 +161,23 @@ export default defineComponent({
     };
 
     const handleColumnHeaderClick = (index: number) => {
+      let sortOrderValue: 'asc' | 'desc';
       if (sortedColumnIndex.value === index) {
-        sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+        sortOrderValue = props.sortOrder === 'asc' ? 'desc' : 'asc';
       } else {
         sortedColumnIndex.value = index;
-        sortOrder.value = 'asc';
+        sortOrderValue = 'asc';
       }
+      
       sortKey.value = columns[index].key;
+
+      router.replace({
+        query: {
+          ...router.currentRoute.value.query,
+          sortKey: sortKey.value,
+          sortOrder: sortOrderValue,
+        },
+      });
     };
 
     const columns: ColumnModel[] = [
@@ -170,7 +197,6 @@ export default defineComponent({
       paginatedUsers,
       totalPages,
       sortedColumnIndex,
-      sortOrder,
       onSearch,
       prevPage,
       nextPage,
