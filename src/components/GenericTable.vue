@@ -12,8 +12,13 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-if="paginatedRows.length === 0">
+        <tr v-if="rows.length === 0">
           <td :colspan="columns.length" class="no-data">Ничего не найдено</td>
+        </tr>
+        <tr v-else-if="page > totalPages || page < 1">
+          <td :colspan="columns.length" class="no-data">
+            Страница не найдена (<a href="#" @click.prevent="goToFirstPage">перейти к началу</a>)
+          </td>
         </tr>
         <tr v-else v-for="row in paginatedRows" :key="row.id">
           <td v-for="column in columns" :key="column.key">
@@ -105,6 +110,10 @@ export default defineComponent({
       }
     };
 
+    const goToFirstPage = () => {
+      emit('update:page', 1);
+    };
+
     const paginatedRows = computed(() => {
       const start = (props.page - 1) * props.rowsInAPage;
       const end = start + props.rowsInAPage;
@@ -122,6 +131,7 @@ export default defineComponent({
       prevPage,
       nextPage,
       goToPage,
+      goToFirstPage,
       getValueByPath,
     };
   },
@@ -167,5 +177,15 @@ export default defineComponent({
   text-align: center;
   color: #999;
   font-style: italic;
+}
+
+.no-data a {
+  cursor: pointer;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.no-data a:hover {
+  text-decoration: underline;
 }
 </style>

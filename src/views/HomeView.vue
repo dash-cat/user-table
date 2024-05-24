@@ -17,9 +17,6 @@
       @update:page="currentPageLocal = $event"
       @onClickColumnHeader="handleColumnHeaderClick"
     />
-    <div v-if="filteredUsers.length === 0" class="no-results">
-      Ничего не найдено
-    </div>
   </div>
 </template>
 
