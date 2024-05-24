@@ -13,6 +13,7 @@
 import { defineComponent } from 'vue';
 import UserTable from '../components/UserTable.vue';
 import { useRoute } from 'vue-router';
+import { SortOrder } from '@/types/SortOrder';
 
 export default defineComponent({
   name: 'HomeView',
@@ -24,7 +25,7 @@ export default defineComponent({
     const searchQuery = (route.query.search as string) || '';
     const page = parseInt(route.query.page as string, 10) || 1;
     const sortKey = (route.query.sortKey as string) || '';
-    const sortOrder = (route.query.sortOrder as 'asc' | 'desc') || 'asc';
+    const sortOrder = (route.query.sortOrder as SortOrder) || 'asc';
 
     return {
       searchQuery,

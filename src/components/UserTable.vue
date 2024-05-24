@@ -37,6 +37,7 @@ import PaginationStrip from './PaginationStrip.vue';
 import { User } from '@/types/User';
 import { getValueByPath, includesIgnoringCase } from '@/utils';
 import { ColumnModel } from '@/types/ColumnModel';
+import { SortOrder } from '@/types/SortOrder';
 
 export default defineComponent({
   name: 'UserTable',
@@ -59,7 +60,7 @@ export default defineComponent({
       required: true,
     },
     sortOrder: {
-      type: String as PropType<'asc' | 'desc'>,
+      type: String as PropType<SortOrder>,
       required: true,
     },
   },
@@ -161,21 +162,21 @@ export default defineComponent({
     };
 
     const handleColumnHeaderClick = (index: number) => {
-      let sortOrderValue: 'asc' | 'desc';
+      let sortOrder: SortOrder;
       if (sortedColumnIndex.value === index) {
-        sortOrderValue = props.sortOrder === 'asc' ? 'desc' : 'asc';
+        sortOrder = props.sortOrder === 'asc' ? 'desc' : 'asc';
       } else {
         sortedColumnIndex.value = index;
-        sortOrderValue = 'asc';
+        sortOrder = 'asc';
       }
-      
+
       sortKey.value = columns[index].key;
 
       router.replace({
         query: {
           ...router.currentRoute.value.query,
           sortKey: sortKey.value,
-          sortOrder: sortOrderValue,
+          sortOrder,
         },
       });
     };

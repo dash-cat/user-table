@@ -39,6 +39,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { ColumnModel } from '@/types/ColumnModel';
+import { SortOrder } from '@/types/SortOrder';
 import { getValueByPath } from '@/utils';
 
 export default defineComponent({
@@ -57,7 +58,7 @@ export default defineComponent({
       required: true,
     },
     sortOrder: {
-      type: String as PropType<'asc' | 'desc'>,
+      type: String as PropType<SortOrder>,
       required: true,
     },
   },
