@@ -3,9 +3,9 @@
     <table class="generic-table">
       <thead>
         <tr>
-          <th v-for="column in columns" :key="column.key" @click="column.isSortable ? sort(column.key) : null">
+          <th v-for="(column, index) in columns" :key="column.key" @click="column.isSortable ? onClickColumnHeader(index) : null">
             {{ column.name }}
-            <span v-if="sortKey === column.key">
+            <span v-if="sortedColumnIndex === index">
               {{ sortOrder === 'asc' ? '⬆️' : '⬇️' }}
             </span>
           </th>
@@ -15,7 +15,7 @@
         <tr v-if="rows.length === 0">
           <td :colspan="columns.length" class="no-data">Ничего не найдено</td>
         </tr>
-        <tr v-else v-for="row in sortedRows" :key="row.id">
+        <tr v-else v-for="row in rows" :key="row.id">
           <td v-for="column in columns" :key="column.key">
             <template v-if="column.kind === 'image'">
               <img :src="getValueByPath(row, column.key)" alt="image" />
@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, PropType } from 'vue';
+import { defineComponent, PropType } from 'vue';
 import { ColumnModel } from '@/types/ColumnModel';
 import { getValueByPath } from '@/utils';
 
@@ -52,40 +52,21 @@ export default defineComponent({
       type: Array as PropType<Array<Record<string, any>>>,
       required: true,
     },
+    sortedColumnIndex: {
+      type: Number,
+      required: true,
+    },
+    sortOrder: {
+      type: String as PropType<'asc' | 'desc'>,
+      required: true,
+    },
   },
-  setup(props) {
-    const sortKey = ref<string>('');
-    const sortOrder = ref<string>('asc');
-
-    const sortedRows = computed(() => {
-      if (!sortKey.value) return props.rows;
-
-      return [...props.rows].sort((a, b) => {
-        const aValue = getValueByPath(a, sortKey.value);
-        const bValue = getValueByPath(b, sortKey.value);
-
-        if (aValue < bValue) return sortOrder.value === 'asc' ? -1 : 1;
-        if (aValue > bValue) return sortOrder.value === 'asc' ? 1 : -1;
-        return 0;
-      });
-    });
-
-    const sort = (key: string) => {
-      if (sortKey.value === key) {
-        sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
-      } else {
-        sortKey.value = key;
-        sortOrder.value = 'asc';
-      }
-    };
-
-    return {
-      sortKey,
-      sortOrder,
-      sortedRows,
-      sort,
-      getValueByPath,
-    };
+  emits: ['onClickColumnHeader'],
+  methods: {
+    onClickColumnHeader(index: number) {
+      this.$emit('onClickColumnHeader', index);
+    },
+    getValueByPath,
   },
 });
 </script>

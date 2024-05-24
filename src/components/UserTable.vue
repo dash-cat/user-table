@@ -7,7 +7,13 @@
     <div class="notification">
       Кликните на заголовок колонки для сортировки
     </div>
-    <GenericTable :columns="columns" :rows="paginatedUsers" />
+    <GenericTable
+      :columns="columns"
+      :rows="paginatedUsers"
+      :sortedColumnIndex="sortedColumnIndex"
+      :sortOrder="sortOrder"
+      @onClickColumnHeader="handleColumnHeaderClick"
+    />
     <div v-if="paginatedUsers.length === 0" class="no-results">
       Ничего не найдено
     </div>
@@ -24,13 +30,13 @@
 <script lang="ts">
 import { defineComponent, ref, computed, watch, onMounted } from 'vue';
 import axios from 'axios';
+import { useRouter } from 'vue-router';
 import GenericTable from './GenericTable.vue';
 import SearchInput from './SearchInput.vue';
 import PaginationStrip from './PaginationStrip.vue';
 import { User } from '@/types/User';
 import { getValueByPath, includesIgnoringCase } from '@/utils';
 import { ColumnModel } from '@/types/ColumnModel';
-import { useRouter } from 'vue-router';
 
 export default defineComponent({
   name: 'UserTable',
@@ -45,7 +51,9 @@ export default defineComponent({
     const currentPageLocal = ref<number>(1);
     const itemsPerPage = ref<number>(20);
     const sortKey = ref<string>('');
-    const sortOrder = ref<string>('asc');
+    const sortOrder = ref<'asc' | 'desc'>('asc');
+    const sortedColumnIndex = ref<number>(-1);
+
     const router = useRouter();
 
     const fetchUsers = async () => {
@@ -135,6 +143,16 @@ export default defineComponent({
       }
     };
 
+    const handleColumnHeaderClick = (index: number) => {
+      if (sortedColumnIndex.value === index) {
+        sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortedColumnIndex.value = index;
+        sortOrder.value = 'asc';
+      }
+      sortKey.value = columns[index].key;
+    };
+
     const columns: ColumnModel[] = [
       { name: 'Аватар', isSortable: false, key: 'picture.medium', kind: 'image' },
       { name: 'ФИО', isSortable: true, key: 'name.first', kind: 'text' },
@@ -151,10 +169,13 @@ export default defineComponent({
       columns,
       paginatedUsers,
       totalPages,
+      sortedColumnIndex,
+      sortOrder,
       onSearch,
       prevPage,
       nextPage,
       goToPage,
+      handleColumnHeaderClick,
     };
   },
 });
