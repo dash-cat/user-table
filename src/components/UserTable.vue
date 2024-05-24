@@ -96,9 +96,9 @@ export default defineComponent({
     watch(
       () => [searchQueryLocal.value, currentPageLocal.value, sortKey.value, sortOrder.value],
       ([newSearchQuery, newPage, newSortKey, newSortOrder]) => {
-        if (newPage < 1) {
+        if ((newPage as number) < 1) {
           newPage = 1;
-        } else if (newPage > totalPages.value) {
+        } else if ((newPage as number) > totalPages.value) {
           newPage = totalPages.value;
         }
         router.replace({
