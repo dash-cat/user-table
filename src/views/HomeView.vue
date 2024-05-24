@@ -9,21 +9,17 @@
     </div>
     <GenericTable
       :columns="columns"
-      :rows="paginatedUsers"
+      :rows="users"
       :sortedColumnIndex="sortedColumnIndex"
       :sortOrder="sortOrder"
+      :rowsInAPage="itemsPerPage"
+      :page="currentPageLocal"
+      @update:page="currentPageLocal = $event"
       @onClickColumnHeader="handleColumnHeaderClick"
     />
-    <div v-if="paginatedUsers.length === 0" class="no-results">
+    <div v-if="users.length === 0" class="no-results">
       Ничего не найдено
     </div>
-    <PaginationStrip
-      :currentPage="currentPageLocal"
-      :totalPages="totalPages"
-      @prevPage="prevPage"
-      @nextPage="nextPage"
-      @goToPage="goToPage"
-    />
   </div>
 </template>
 
@@ -33,7 +29,6 @@ import axios from 'axios';
 import { useRouter, useRoute } from 'vue-router';
 import GenericTable from '../components/GenericTable.vue';
 import SearchInput from '../components/SearchInput.vue';
-import PaginationStrip from '../components/PaginationStrip.vue';
 import { User } from '@/types/User';
 import { getValueByPath, includesIgnoringCase } from '@/utils';
 import { ColumnModel } from '@/types/ColumnModel';
@@ -44,7 +39,6 @@ export default defineComponent({
   components: {
     GenericTable,
     SearchInput,
-    PaginationStrip,
   },
   setup() {
     const route = useRoute();
@@ -93,12 +87,6 @@ export default defineComponent({
       );
     });
 
-    const paginatedUsers = computed(() => {
-      const start = (currentPageLocal.value - 1) * itemsPerPage.value;
-      const end = start + itemsPerPage.value;
-      return filteredUsers.value.slice(start, end);
-    });
-
     const totalPages = computed(() => {
       return Math.ceil(filteredUsers.value.length / itemsPerPage.value);
     });
@@ -125,24 +113,6 @@ export default defineComponent({
     const onSearch = (value: string) => {
       searchQueryLocal.value = value;
       currentPageLocal.value = 1;
-    };
-
-    const prevPage = () => {
-      if (currentPageLocal.value > 1) {
-        currentPageLocal.value -= 1;
-      }
-    };
-
-    const nextPage = () => {
-      if (currentPageLocal.value < totalPages.value) {
-        currentPageLocal.value += 1;
-      }
-    };
-
-    const goToPage = (page: number) => {
-      if (page >= 1 && page <= totalPages.value) {
-        currentPageLocal.value = page;
-      }
     };
 
     const handleColumnHeaderClick = (index: number) => {
@@ -174,17 +144,15 @@ export default defineComponent({
     ];
 
     return {
+      users,
       searchQueryLocal,
       currentPageLocal,
+      itemsPerPage,
       columns,
-      paginatedUsers,
       totalPages,
       sortedColumnIndex,
       sortOrder,
       onSearch,
-      prevPage,
-      nextPage,
-      goToPage,
       handleColumnHeaderClick,
     };
   },

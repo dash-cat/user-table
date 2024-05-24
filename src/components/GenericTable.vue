@@ -12,10 +12,10 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-if="rows.length === 0">
+        <tr v-if="paginatedRows.length === 0">
           <td :colspan="columns.length" class="no-data">Ничего не найдено</td>
         </tr>
-        <tr v-else v-for="row in rows" :key="row.id">
+        <tr v-else v-for="row in paginatedRows" :key="row.id">
           <td v-for="column in columns" :key="column.key">
             <template v-if="column.kind === 'image'">
               <img :src="getValueByPath(row, column.key)" alt="image" />
@@ -33,17 +33,28 @@
         </tr>
       </tbody>
     </table>
+    <PaginationStrip
+      :currentPage="page"
+      :totalPages="totalPages"
+      @prevPage="prevPage"
+      @nextPage="nextPage"
+      @goToPage="goToPage"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, PropType, computed } from 'vue';
 import { ColumnModel } from '@/types/ColumnModel';
 import { SortOrder } from '@/types/SortOrder';
 import { getValueByPath } from '@/utils';
+import PaginationStrip from './PaginationStrip.vue';
 
 export default defineComponent({
   name: 'GenericTable',
+  components: {
+    PaginationStrip,
+  },
   props: {
     columns: {
       type: Array as PropType<ColumnModel[]>,
@@ -61,13 +72,64 @@ export default defineComponent({
       type: String as PropType<SortOrder>,
       required: true,
     },
-  },
-  emits: ['onClickColumnHeader'],
-  methods: {
-    onClickColumnHeader(index: number) {
-      this.$emit('onClickColumnHeader', index);
+    rowsInAPage: {
+      type: Number,
+      required: true,
     },
-    getValueByPath,
+    page: {
+      type: Number,
+      required: true,
+    },
+  },
+  emits: ['onClickColumnHeader', 'update:page'],
+  setup(props, { emit }) {
+    const onClickColumnHeader = (index: number) => {
+      emit('onClickColumnHeader', index);
+    };
+
+    const prevPage = () => {
+      if (props.page > 1) {
+        emit('update:page', props.page - 1);
+      }
+    };
+
+    const nextPage = () => {
+      if (props.page < totalPages.value) {
+        emit('update:page', props.page + 1);
+      }
+    };
+
+    const goToPage = (page: number) => {
+      if (page >= 1 && page <= totalPages.value) {
+        emit('update:page', page);
+      }
+    };
+
+    const paginatedRows = computed(() => {
+      const start = (props.page - 1) * props.rowsInAPage;
+      const end = start + props.rowsInAPage;
+      return props.rows.slice(start, end);
+    });
+
+    const totalPages = computed(() => {
+      console.log('totalPages',
+       props.rows.length,
+        props.rowsInAPage,
+         props.rows.length / props.rowsInAPage,
+         Math.ceil(props.rows.length / props.rowsInAPage)
+          )
+      return Math.ceil(props.rows.length / props.rowsInAPage);
+    });
+
+    return {
+      paginatedRows,
+      totalPages,
+      onClickColumnHeader,
+      prevPage,
+      nextPage,
+      goToPage,
+      getValueByPath,
+    };
   },
 });
 </script>
