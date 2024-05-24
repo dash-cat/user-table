@@ -15,17 +15,23 @@ export default createStore({
     setUsers(state, users: User[]) {
       state.users = users;
     },
-    setSearchQuery(state, query: string) {
-      state.searchQuery = query;
-    },
-    setCurrentPage(state, page: number) {
-      state.currentPage = page;
-    },
-    setSortKey(state, key: string) {
-      state.sortKey = key;
-    },
-    setSortOrder(state, order: string) {
-      state.sortOrder = order;
+    setFilters(state, {
+       query, page, key, order
+    }: {
+      query: string, page: number, key: string, order: string
+    }) {
+      if (query !== undefined) {
+        state.searchQuery = query;
+      }
+      if (page !== undefined) {
+        state.currentPage = page;
+      }
+      if (key !== undefined) {
+        state.sortKey = key;
+      }
+      if (order !== undefined) {
+        state.sortOrder = order;
+      }
     },
   },
   actions: {
@@ -37,17 +43,17 @@ export default createStore({
         console.error('Error fetching users:', error);
       }
     },
-    setSearchQuery({ commit }, query: string) {
-      commit('setSearchQuery', query);
+    setSearchQuery({ commit }, query) {
+      commit('setFilters', { query });
     },
-    setCurrentPage({ commit }, page: number) {
-      commit('setCurrentPage', page);
+    setCurrentPage({ commit }, page) {
+      commit('setFilters', { page });
     },
-    setSortKey({ commit }, key: string) {
-      commit('setSortKey', key);
+    setSortKey({ commit }, key) {
+      commit('setFilters', { key });
     },
-    setSortOrder({ commit }, order: string) {
-      commit('setSortOrder', order);
+    setSortOrder({ commit }, order) {
+      commit('setFilters', { order });
     },
   },
   getters: {

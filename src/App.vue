@@ -25,10 +25,12 @@ export default class App extends Vue {
     const sortKey = route.query.sortKey || '';
     const sortOrder = route.query.sortOrder || 'asc';
 
-    store.dispatch('setSearchQuery', searchQuery);
-    store.dispatch('setCurrentPage', page);
-    store.dispatch('setSortKey', sortKey);
-    store.dispatch('setSortOrder', sortOrder);
+    store.commit('setFilters', {
+      query: searchQuery,
+      page,
+      key: sortKey,
+      order: sortOrder
+    });
   }
 }
 </script>
