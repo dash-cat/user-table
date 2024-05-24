@@ -12,7 +12,7 @@
       :rows="filteredUsers"
       :sortedColumnIndex="sortedColumnIndex"
       :sortOrder="sortOrder"
-      :rowsInAPage="itemsPerPage"
+      :rowsInAPage="20"
       :page="currentPageLocal"
       @update:page="currentPageLocal = $event"
       @onClickColumnHeader="handleColumnHeaderClick"
@@ -47,21 +47,35 @@ export default defineComponent({
 
     const searchQueryLocal = ref<string>((route.query.search as string) || '');
     const currentPageLocal = ref<number>(parseInt(route.query.page as string, 10) || 1);
-    const itemsPerPage = ref<number>(20);
-    const sortKey = ref<string>((route.query.sortKey as string) || '');
-    const sortOrder = ref<SortOrder>((route.query.sortOrder as SortOrder) || 'asc');
-    const sortedColumnIndex = ref<number>(-1);
+
+    const columns: ColumnModel[] = [
+      { name: 'Аватар', isSortable: false, key: 'picture.medium', kind: 'image' },
+      { name: 'ФИО', isSortable: true, key: 'name.first', kind: 'text' },
+      { name: 'Пол', isSortable: true, key: 'gender', kind: 'text' },
+      { name: 'Страна', isSortable: true, key: 'location.country', kind: 'text' },
+      { name: 'Дата рождения', isSortable: true, key: 'dob.date', kind: 'date' },
+      { name: 'Адрес электронной почты', isSortable: true, key: 'email', kind: 'email' },
+      { name: 'Телефон', isSortable: true, key: 'phone', kind: 'text' },
+    ];
+
+    const sortOrder = computed(() => {
+      return String(route.query.sortOrder) as SortOrder;
+    });
+
+    const sortedColumnIndex = computed(() => {
+      return columns.findIndex(column => column.key === route.query.sortKey);
+    });
 
     const sortedUsers = computed(() => {
       const sorted = [...store.state.users];
-      if (sortKey.value) {
+      if (route.query.sortKey) {
         sorted.sort((a, b) => {
-          const aValue = getValueByPath(a, sortKey.value);
-          const bValue = getValueByPath(b, sortKey.value);
+          const aValue = getValueByPath(a, String(route.query.sortKey));
+          const bValue = getValueByPath(b, String(route.query.sortKey));
           let result = 0;
           if (aValue < bValue) result = -1;
           if (aValue > bValue) result = 1;
-          return sortOrder.value === 'asc' ? result : -result;
+          return route.query.sortOrder === 'asc' ? result : -result;
         });
       }
       return sorted;
@@ -77,13 +91,13 @@ export default defineComponent({
     });
 
     watch(
-      () => [searchQueryLocal.value, currentPageLocal.value, sortKey.value, sortOrder.value],
+      () => [searchQueryLocal.value, currentPageLocal.value, route.query.sortKey, route.query.sortOrder],
       ([newSearchQuery, newPage, newSortKey, newSortOrder]) => {
         // XXX: limit page's value
         router.replace({
           query: {
             search: newSearchQuery || undefined,
-            page: newPage !== 1 ? newPage.toString() : undefined,
+            page: newPage !== 1 ? (newPage || 1).toString() : undefined,
             sortKey: newSortKey || undefined,
             sortOrder: newSortOrder !== 'asc' ? newSortOrder : undefined,
           },
@@ -97,41 +111,29 @@ export default defineComponent({
     };
 
     const handleColumnHeaderClick = (index: number) => {
+      let sortOrder: SortOrder;
       if (sortedColumnIndex.value === index) {
-        sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+        sortOrder = route.query.sortOrder === 'asc' ? 'desc' : 'asc';
       } else {
-        sortedColumnIndex.value = index;
-        sortOrder.value = 'asc';
+        sortOrder = 'asc';
       }
-      sortKey.value = columns[index].key;
 
       router.replace({
         query: {
           ...router.currentRoute.value.query,
-          sortKey: sortKey.value,
-          sortOrder: sortOrder.value,
+          sortKey: columns[index].key,
+          sortOrder,
         },
       });
     };
-
-    const columns: ColumnModel[] = [
-      { name: 'Аватар', isSortable: false, key: 'picture.medium', kind: 'image' },
-      { name: 'ФИО', isSortable: true, key: 'name.first', kind: 'text' },
-      { name: 'Пол', isSortable: true, key: 'gender', kind: 'text' },
-      { name: 'Страна', isSortable: true, key: 'location.country', kind: 'text' },
-      { name: 'Дата рождения', isSortable: true, key: 'dob.date', kind: 'date' },
-      { name: 'Адрес электронной почты', isSortable: true, key: 'email', kind: 'email' },
-      { name: 'Телефон', isSortable: true, key: 'phone', kind: 'text' },
-    ];
 
     return {
       filteredUsers,
       searchQueryLocal,
       currentPageLocal,
-      itemsPerPage,
+      sortOrder,
       columns,
       sortedColumnIndex,
-      sortOrder,
       onSearch,
       handleColumnHeaderClick,
     };
