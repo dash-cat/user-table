@@ -1,6 +1,7 @@
 import { createStore } from 'vuex';
-import { User } from '@/types/User';
 import axios from 'axios';
+import { User } from '@/types/User';
+import { getValueByPath, includesIgnoringCase } from '@/utils';
 
 export default createStore({
   state: {
@@ -82,11 +83,3 @@ export default createStore({
     },
   },
 });
-
-function getValueByPath(obj: any, path: string) {
-  return path.split('.').reduce((acc, part) => acc && acc[part], obj);
-}
-
-function includesIgnoringCase(source: string, target: string): boolean {
-  return source.toLowerCase().includes(target.toLowerCase());
-}

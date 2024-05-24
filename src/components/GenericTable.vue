@@ -39,6 +39,7 @@
 <script lang="ts">
 import { defineComponent, ref, computed, PropType } from 'vue';
 import { ColumnModel } from '@/types/ColumnModel';
+import { getValueByPath } from '@/utils';
 
 export default defineComponent({
   name: 'GenericTable',
@@ -87,10 +88,6 @@ export default defineComponent({
     };
   },
 });
-
-function getValueByPath(obj: any, path: string) {
-  return path.split('.').reduce((acc, part) => acc && acc[part], obj);
-}
 </script>
 
 <style scoped>
