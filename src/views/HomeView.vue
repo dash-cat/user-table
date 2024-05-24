@@ -24,8 +24,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, watch, onMounted } from 'vue';
-import axios from 'axios';
+import { defineComponent, ref, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import GenericTable from '../components/GenericTable.vue';
 import SearchInput from '../components/SearchInput.vue';
@@ -33,6 +32,7 @@ import { User } from '@/types/User';
 import { getValueByPath, includesIgnoringCase } from '@/utils';
 import { ColumnModel } from '@/types/ColumnModel';
 import { SortOrder } from '@/types/SortOrder';
+import { useStore } from 'vuex';
 
 export default defineComponent({
   name: 'HomeView',
@@ -43,8 +43,8 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const router = useRouter();
+    const store = useStore();
 
-    const users = ref<User[]>([]);
     const searchQueryLocal = ref<string>((route.query.search as string) || '');
     const currentPageLocal = ref<number>(parseInt(route.query.page as string, 10) || 1);
     const itemsPerPage = ref<number>(20);
@@ -52,19 +52,8 @@ export default defineComponent({
     const sortOrder = ref<SortOrder>((route.query.sortOrder as SortOrder) || 'asc');
     const sortedColumnIndex = ref<number>(-1);
 
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get('/api.json');
-        users.value = response.data.results;
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
-    };
-
-    onMounted(fetchUsers);
-
     const sortedUsers = computed(() => {
-      const sorted = [...users.value];
+      const sorted = [...store.state.users];
       if (sortKey.value) {
         sorted.sort((a, b) => {
           const aValue = getValueByPath(a, sortKey.value);
