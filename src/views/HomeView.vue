@@ -91,15 +91,13 @@ export default defineComponent({
     });
 
     watch(
-      () => [searchQueryLocal.value, currentPageLocal.value, route.query.sortKey, route.query.sortOrder],
-      ([newSearchQuery, newPage, newSortKey, newSortOrder]) => {
+      () => [searchQueryLocal.value, currentPageLocal.value],
+      ([newSearchQuery, newPage]) => {
         // XXX: limit page's value
         router.replace({
           query: {
             search: newSearchQuery || undefined,
             page: newPage !== 1 ? (newPage || 1).toString() : undefined,
-            sortKey: newSortKey || undefined,
-            sortOrder: newSortOrder !== 'asc' ? newSortOrder : undefined,
           },
         });
       }
