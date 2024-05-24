@@ -1,19 +1,16 @@
 <template>
   <div id="app">
-    <UserTable />
+    <router-view />
   </div>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import UserTable from './components/UserTable.vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 
 @Options({
-  components: {
-    UserTable,
-  },
+  components: {},
 })
 export default class App extends Vue {
   mounted() {
