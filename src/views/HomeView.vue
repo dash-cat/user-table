@@ -88,12 +88,23 @@ export default defineComponent({
     });
 
     watch(
-      () => [searchQueryLocal.value, currentPageLocal.value],
-      ([newSearchQuery, newPage]) => {
-        // XXX: limit page's value
+      searchQueryLocal,
+      (newSearchQuery) => {
+        currentPageLocal.value = 1
         router.replace({
           query: {
             search: newSearchQuery || undefined,
+          },
+        });
+      }
+    );
+
+
+    watch(
+      currentPageLocal,
+      (newPage) => {
+        router.replace({
+          query: {
             page: newPage !== 1 ? (newPage || 1).toString() : undefined,
           },
         });
