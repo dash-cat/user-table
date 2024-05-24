@@ -112,12 +112,6 @@ export default defineComponent({
     });
 
     const totalPages = computed(() => {
-      console.log('totalPages',
-       props.rows.length,
-        props.rowsInAPage,
-         props.rows.length / props.rowsInAPage,
-         Math.ceil(props.rows.length / props.rowsInAPage)
-          )
       return Math.ceil(props.rows.length / props.rowsInAPage);
     });
 

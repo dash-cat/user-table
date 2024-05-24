@@ -30,14 +30,6 @@ export default createStore({
     },
   },
   actions: {
-    async fetchUsers({ commit }) {
-      try {
-        const response = await axios.get('/api.json');
-        commit('setUsers', response.data.results);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
-    },
     setFilters({ commit }, filters: {
       query: string, page: number, key: string, order: string
     }) {

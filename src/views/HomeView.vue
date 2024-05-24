@@ -9,7 +9,7 @@
     </div>
     <GenericTable
       :columns="columns"
-      :rows="users"
+      :rows="filteredUsers"
       :sortedColumnIndex="sortedColumnIndex"
       :sortOrder="sortOrder"
       :rowsInAPage="itemsPerPage"
@@ -17,7 +17,7 @@
       @update:page="currentPageLocal = $event"
       @onClickColumnHeader="handleColumnHeaderClick"
     />
-    <div v-if="users.length === 0" class="no-results">
+    <div v-if="filteredUsers.length === 0" class="no-results">
       Ничего не найдено
     </div>
   </div>
@@ -87,18 +87,10 @@ export default defineComponent({
       );
     });
 
-    const totalPages = computed(() => {
-      return Math.ceil(filteredUsers.value.length / itemsPerPage.value);
-    });
-
     watch(
       () => [searchQueryLocal.value, currentPageLocal.value, sortKey.value, sortOrder.value],
       ([newSearchQuery, newPage, newSortKey, newSortOrder]) => {
-        if ((newPage as number) < 1) {
-          newPage = 1;
-        } else if ((newPage as number) > totalPages.value) {
-          newPage = totalPages.value;
-        }
+        // XXX: limit page's value
         router.replace({
           query: {
             search: newSearchQuery || undefined,
@@ -144,12 +136,11 @@ export default defineComponent({
     ];
 
     return {
-      users,
+      filteredUsers,
       searchQueryLocal,
       currentPageLocal,
       itemsPerPage,
       columns,
-      totalPages,
       sortedColumnIndex,
       sortOrder,
       onSearch,

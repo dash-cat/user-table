@@ -10,6 +10,5 @@ app.use(router);
 
 (async () => {
   await router.isReady();
-  await store.dispatch('fetchUsers');
   app.mount('#app');
 })();
